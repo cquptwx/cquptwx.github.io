@@ -1,0 +1,1196 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.lug.ustc.edu.cn/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+  
+
+<link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="linux,dnsmasq">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="https://wxblog.b0.upaiyun.com/pic/ico/favicon.ico?v=5.1.1">
+
+
+
+
+
+
+<meta name="description" content="Dnsmasq适用于小型网络架构，为其中的主机提供DNS、DHCP等服务。本文将介绍其DNS功能的简单使用，并在内网环境中搭建Dnsmasq服务器为两个节点提供DNS服务。">
+<meta name="keywords" content="linux,dnsmasq">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dnsmasq-为小型网络环境提供DNS服务">
+<meta property="og:url" content="https://iwangxin.net/p/43d3dbac/index.html">
+<meta property="og:site_name" content="小鑫的BLOG">
+<meta property="og:description" content="Dnsmasq适用于小型网络架构，为其中的主机提供DNS、DHCP等服务。本文将介绍其DNS功能的简单使用，并在内网环境中搭建Dnsmasq服务器为两个节点提供DNS服务。">
+<meta property="og:image" content="https://wxblog.b0.upaiyun.com/pic/post/2017-02-13/Network-945x349.png">
+<meta property="og:updated_time" content="2017-03-28T15:04:02.936Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Dnsmasq-为小型网络环境提供DNS服务">
+<meta name="twitter:description" content="Dnsmasq适用于小型网络架构，为其中的主机提供DNS、DHCP等服务。本文将介绍其DNS功能的简单使用，并在内网环境中搭建Dnsmasq服务器为两个节点提供DNS服务。">
+<meta name="twitter:image" content="https://wxblog.b0.upaiyun.com/pic/post/2017-02-13/Network-945x349.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":false,"scrollpercent":true},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://iwangxin.net/p/43d3dbac/">
+
+
+
+
+
+  <title> Dnsmasq-为小型网络环境提供DNS服务 | 小鑫的BLOG </title>
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小鑫的BLOG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th-large"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-folder-open"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="此处输入搜索内容" spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://iwangxin.net/p/43d3dbac/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WangXin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://wxblog.b0.upaiyun.com/pic/png/avatar_120x120.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小鑫的BLOG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Dnsmasq-为小型网络环境提供DNS服务
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-13T10:47:38+08:00">
+                2017-02-13
+              </time>
+            
+
+            
+              <span class="post-meta-divider post-meta-item-text-time-update-line">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o post-meta-item-text-time-update-icon"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time class="post-meta-item-text-time-update" title="更新于" itemprop="dateModified" datetime="2017-03-28T23:04:02+08:00">
+                2017-03-28
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux服务配置/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux服务配置</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a class="cloud-tie-join-count" href="/p/43d3dbac/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/p/43d3dbac/" class="leancloud_visitors" data-flag-title="Dnsmasq-为小型网络环境提供DNS服务">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-pencil-square-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本篇文章共</span>
+                
+                <span title="本篇文章共">
+                  1,456 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长预计</span>
+                
+                <span title="阅读时长预计">
+                  8 min
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="https://wxblog.b0.upaiyun.com/pic/post/2017-02-13/Network-945x349.png" alt=""><br>Dnsmasq适用于小型网络架构，为其中的主机提供DNS、DHCP等服务。本文将介绍其DNS功能的简单使用，并在内网环境中搭建Dnsmasq服务器为两个节点提供DNS服务。<br><a id="more"></a></p>
+<h2 id="Dnsmasq-简介和适用平台"><a href="#Dnsmasq-简介和适用平台" class="headerlink" title="Dnsmasq 简介和适用平台"></a>Dnsmasq 简介和适用平台</h2><blockquote>
+<p>Dnsmasq provides network infrastructure for small networks: DNS, DHCP, router advertisement and network boot. It is designed to be lightweight and have a small footprint, suitable for resource constrained routers and firewalls. It has also been widely used for tethering on smartphones and portable hotspots, and to support virtual networking in virtualisation frameworks.<br>Supported platforms include Linux (with glibc and uclibc), Android, *BSD, and Mac OS X. Dnsmasq is included in most Linux distributions and the ports systems of FreeBSD, OpenBSD and NetBSD. Dnsmasq provides full IPv6 support.<br><a href="http://www.thekelleys.org.uk/dnsmasq/doc.html" rel="external nofollow noopener noreferrer" target="_blank">摘自Dnsmasq官网</a></p>
+</blockquote>
+<h2 id="Dnsmasq-部署"><a href="#Dnsmasq-部署" class="headerlink" title="Dnsmasq 部署"></a>Dnsmasq 部署</h2><table>
+<thead>
+<tr>
+<th style="text-align:center">主机名</th>
+<th style="text-align:center">IP地址</th>
+<th style="text-align:center">操作系统</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">dns-server</td>
+<td style="text-align:center">172.168.1.125</td>
+<td style="text-align:center">CentOS 7.2.1511</td>
+</tr>
+<tr>
+<td style="text-align:center">dns-client1</td>
+<td style="text-align:center">172.168.1.140</td>
+<td style="text-align:center">CentOS 6.8</td>
+</tr>
+<tr>
+<td style="text-align:center">dns-client2</td>
+<td style="text-align:center">172.168.1.141</td>
+<td style="text-align:center">CentOS 6.8</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dns-server-安装-Dnsmasq"><a href="#dns-server-安装-Dnsmasq" class="headerlink" title="dns-server 安装 Dnsmasq"></a>dns-server 安装 Dnsmasq</h3><h4 id="通过yum安装"><a href="#通过yum安装" class="headerlink" title="通过yum安装"></a>通过yum安装</h4><p>使用<a href="http://mirrors.163.com/" rel="external nofollow noopener noreferrer" target="_blank">网易开源镜像</a> <a href="http://mirrors.163.com/.help/CentOS7-Base-163.repo" rel="external nofollow noopener noreferrer" target="_blank">CentOS7-Base-163.repo</a>（CentOS6使用<a href="http://mirrors.163.com/.help/CentOS6-Base-163.repo" rel="external nofollow noopener noreferrer" target="_blank">CentOS6-Base-163.repo</a>文件）安装后的Dnsmasq版本为version <code>2.66</code>，版本比较旧，如需安装新版本可以选择通过源码安装。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 备份/etc/yum.repos.d/CentOS-Base.repo</span></div><div class="line">mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup</div><div class="line"><span class="comment"># 下载对应操作系统版本repo文件，放入/etc/yum.repos.d/，此处直接wget</span></div><div class="line">wget http://mirrors.163.com/.help/CentOS7-Base-163.repo -P /etc/yum.repos.d/</div><div class="line"><span class="comment"># 清空yum缓存并安装Dnsmasq</span></div><div class="line">yum clean all &amp;&amp; yum install dnsmasq -y</div><div class="line"><span class="comment"># 查看Dnsmasq版本</span></div><div class="line">dnsmasq -v</div></pre></td></tr></table></figure></p>
+<h4 id="通过源码安装"><a href="#通过源码安装" class="headerlink" title="通过源码安装"></a>通过源码安装</h4><p>稳定版下载地址 <a href="http://www.thekelleys.org.uk/dnsmasq/" rel="external nofollow noopener noreferrer" target="_blank">http://www.thekelleys.org.uk/dnsmasq/</a>，目前最新稳定版本为 <code>2.76</code>。<br>测试版下载地址 <a href="http://www.thekelleys.org.uk/dnsmasq/test-releases/" rel="external nofollow noopener noreferrer" target="_blank">http://www.thekelleys.org.uk/dnsmasq/test-releases/</a>，目前最新测试版本为 <code>2.77test3</code>。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 此处直接clone最新版本</span></div><div class="line">git <span class="built_in">clone</span> git://thekelleys.org.uk/dnsmasq.git</div><div class="line"><span class="comment"># 进入目录开始编译，编译前确认安装了gcc</span></div><div class="line"><span class="built_in">cd</span> ./dnsmasq &amp;&amp; make &amp;&amp; make install</div><div class="line"><span class="comment"># 查看Dnsmasq版本</span></div><div class="line">dnsmasq -v</div></pre></td></tr></table></figure></p>
+<h3 id="dns-server-启动-Dnsmasq-服务并设置开机启动"><a href="#dns-server-启动-Dnsmasq-服务并设置开机启动" class="headerlink" title="dns-server 启动 Dnsmasq 服务并设置开机启动"></a>dns-server 启动 Dnsmasq 服务并设置开机启动</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">systemctl start dnsmasq.service</div><div class="line">systemctl <span class="built_in">enable</span> dnsmasq.service</div><div class="line">netstat -tunlp | grep 53</div><div class="line">tcp        0      0 0.0.0.0:53              0.0.0.0:*               LISTEN      1296/dnsmasq        </div><div class="line">tcp6       0      0 :::53                   :::*                    LISTEN      1296/dnsmasq        </div><div class="line">udp        0      0 0.0.0.0:53              0.0.0.0:*                           1296/dnsmasq        </div><div class="line">udp6       0      0 :::53                   :::*                                1296/dnsmasq</div></pre></td></tr></table></figure>
+<h3 id="所有节点关闭防火墙和SELINUX"><a href="#所有节点关闭防火墙和SELINUX" class="headerlink" title="所有节点关闭防火墙和SELINUX"></a>所有节点关闭防火墙和SELINUX</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">systemctl stop firewalld.service</div><div class="line">sed -i <span class="string">'s/SELINUX=enforcing/SELINUX=disabled/g'</span> /etc/selinux/config</div></pre></td></tr></table></figure>
+<h2 id="Dnsmasq-配置"><a href="#Dnsmasq-配置" class="headerlink" title="Dnsmasq 配置"></a>Dnsmasq 配置</h2><h3 id="dns-server-配置"><a href="#dns-server-配置" class="headerlink" title="dns-server 配置"></a>dns-server 配置</h3><h4 id="dns-server-配置-etc-dnsmasq-conf"><a href="#dns-server-配置-etc-dnsmasq-conf" class="headerlink" title="dns-server 配置 /etc/dnsmasq.conf"></a>dns-server 配置 <code>/etc/dnsmasq.conf</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 定义上游DNS服务器</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"resolv-file=/etc/resolv.dnsmasq.conf"</span> &gt;&gt; /etc/dnsmasq.conf</div><div class="line"><span class="comment"># 禁止读取本地hosts</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"no-hosts"</span> &gt;&gt; /etc/dnsmasq.conf</div><div class="line"><span class="comment"># 监听地址</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"listen-address=127.0.0.1,172.168.1.125"</span> &gt;&gt; /etc/dnsmasq.conf</div><div class="line"><span class="comment"># 指定使用本地DNS hosts文件</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"addn-hosts=/etc/dnsmasq.hosts"</span> &gt;&gt; /etc/dnsmasq.conf</div><div class="line"><span class="comment"># DNS缓存大小</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"cache-size=150"</span> &gt;&gt; /etc/dnsmasq.conf</div></pre></td></tr></table></figure>
+<h4 id="dns-server-配置-etc-resolv-conf"><a href="#dns-server-配置-etc-resolv-conf" class="headerlink" title="dns-server 配置 /etc/resolv.conf"></a>dns-server 配置 <code>/etc/resolv.conf</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 增加本地回环</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"nameserver 127.0.0.1"</span> &gt;&gt; /etc/resolv.conf</div></pre></td></tr></table></figure>
+<h4 id="dns-server-配置-etc-dnsmasq-hosts"><a href="#dns-server-配置-etc-dnsmasq-hosts" class="headerlink" title="dns-server 配置 /etc/dnsmasq.hosts"></a>dns-server 配置 <code>/etc/dnsmasq.hosts</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 增加需要解析的地址和域名</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"172.168.1.140    dns.test.com"</span> &gt;&gt; /etc/dnsmasq.hosts</div><div class="line"><span class="built_in">echo</span> <span class="string">"172.168.1.141    dns.test.com"</span> &gt;&gt; /etc/dnsmasq.hosts</div></pre></td></tr></table></figure>
+<h4 id="dns-server-配置-etc-resolv-dnsmasq-conf"><a href="#dns-server-配置-etc-resolv-dnsmasq-conf" class="headerlink" title="dns-server 配置 /etc/resolv.dnsmasq.conf"></a>dns-server 配置 <code>/etc/resolv.dnsmasq.conf</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 增加上游DNS服务器，此处设置为本机</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"nameserver 172.168.1.125"</span> &gt;&gt; /etc/resolv.dnsmasq.conf</div></pre></td></tr></table></figure>
+<h4 id="dns-server-重启-dnsmasq服务"><a href="#dns-server-重启-dnsmasq服务" class="headerlink" title="dns-server 重启 dnsmasq服务"></a>dns-server 重启 dnsmasq服务</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">systemctl restart dnsmasq.service</div></pre></td></tr></table></figure>
+<h3 id="dns-client-配置"><a href="#dns-client-配置" class="headerlink" title="dns-client 配置"></a>dns-client 配置</h3><h4 id="dns-client-配置-etc-resolv-conf"><a href="#dns-client-配置-etc-resolv-conf" class="headerlink" title="dns-client 配置 /etc/resolv.conf"></a>dns-client 配置 <code>/etc/resolv.conf</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 配置DNS地址为dns-server</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"nameserver 172.168.1.125"</span> /etc/resolv.conf</div></pre></td></tr></table></figure>
+<h2 id="Dnsmasq-验证"><a href="#Dnsmasq-验证" class="headerlink" title="Dnsmasq 验证"></a>Dnsmasq 验证</h2><h3 id="dns-server-端验证"><a href="#dns-server-端验证" class="headerlink" title="dns-server 端验证"></a>dns-server 端验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line">[root@dns-server ~]<span class="comment"># dig @172.168.1.125  dns.test.com</span></div><div class="line"></div><div class="line">; &lt;&lt;&gt;&gt; DiG 9.9.4-RedHat-9.9.4-29.el7 &lt;&lt;&gt;&gt; @172.168.1.125 dns.test.com</div><div class="line">; (1 server found)</div><div class="line">;; global options: +cmd</div><div class="line">;; Got answer:</div><div class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 33400</div><div class="line">;; flags: qr aa rd ra ad; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 0</div><div class="line"></div><div class="line">;; QUESTION SECTION:</div><div class="line">;dns.test.com.                  IN      A</div><div class="line"></div><div class="line">;; ANSWER SECTION:</div><div class="line">dns.test.com.           0       IN      A       172.168.1.141</div><div class="line">dns.test.com.           0       IN      A       172.168.1.140</div><div class="line"></div><div class="line">;; Query time: 0 msec</div><div class="line">;; SERVER: 172.168.1.125<span class="comment">#53(172.168.1.125)</span></div><div class="line">;; WHEN: Mon Feb 13 19:28:42 CST 2017</div><div class="line">;; MSG SIZE  rcvd: 62</div><div class="line"></div><div class="line">[root@dns-server ~]<span class="comment"># nslookup dns.test.com</span></div><div class="line">Server:         172.168.1.125</div><div class="line">Address:        172.168.1.125<span class="comment">#53</span></div><div class="line"></div><div class="line">Name:   dns.test.com</div><div class="line">Address: 172.168.1.140</div><div class="line">Name:   dns.test.com</div><div class="line">Address: 172.168.1.141</div><div class="line"></div><div class="line">[root@dns-server ~]<span class="comment"># ping dns.test.com    </span></div><div class="line">PING dns.test.com (172.168.1.141) 56(84) bytes of data.</div><div class="line">64 bytes from dns.test.com (172.168.1.141): icmp_seq=1 ttl=64 time=0.238 ms</div><div class="line">64 bytes from dns.test.com (172.168.1.141): icmp_seq=2 ttl=64 time=0.230 ms</div><div class="line">64 bytes from dns.test.com (172.168.1.141): icmp_seq=3 ttl=64 time=0.174 ms</div><div class="line">^C</div><div class="line">--- dns.test.com ping statistics ---</div><div class="line">3 packets transmitted, 3 received, 0% packet loss, time 1999ms</div><div class="line">rtt min/avg/max/mdev = 0.174/0.214/0.238/0.028 ms</div><div class="line"></div><div class="line">[root@dns-server ~]<span class="comment"># ping dns.test.com</span></div><div class="line">PING dns.test.com (172.168.1.140) 56(84) bytes of data.</div><div class="line">64 bytes from dns.test.com (172.168.1.140): icmp_seq=1 ttl=64 time=0.229 ms</div><div class="line">64 bytes from dns.test.com (172.168.1.140): icmp_seq=2 ttl=64 time=0.210 ms</div><div class="line">64 bytes from dns.test.com (172.168.1.140): icmp_seq=3 ttl=64 time=0.218 ms</div><div class="line">^C</div><div class="line">--- dns.test.com ping statistics ---</div><div class="line">3 packets transmitted, 3 received, 0% packet loss, time 2000ms</div><div class="line">rtt min/avg/max/mdev = 0.210/0.219/0.229/0.007 ms</div></pre></td></tr></table></figure>
+<h3 id="dns-client-端验证"><a href="#dns-client-端验证" class="headerlink" title="dns-client 端验证"></a>dns-client 端验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line">[root@dns-client1 ~]<span class="comment"># dig @172.168.1.125  dns.test.com</span></div><div class="line"></div><div class="line">; &lt;&lt;&gt;&gt; DiG 9.8.2rc1-RedHat-9.8.2-0.47.rc1.el6 &lt;&lt;&gt;&gt; @172.168.1.125 dns.test.com</div><div class="line">; (1 server found)</div><div class="line">;; global options: +cmd</div><div class="line">;; Got answer:</div><div class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 60940</div><div class="line">;; flags: qr aa rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 0</div><div class="line"></div><div class="line">;; QUESTION SECTION:</div><div class="line">;dns.test.com.                  IN      A</div><div class="line"></div><div class="line">;; ANSWER SECTION:</div><div class="line">dns.test.com.           0       IN      A       172.168.1.140</div><div class="line">dns.test.com.           0       IN      A       172.168.1.141</div><div class="line"></div><div class="line">;; Query time: 0 msec</div><div class="line">;; SERVER: 172.168.1.125<span class="comment">#53(172.168.1.125)</span></div><div class="line">;; WHEN: Mon Feb 13 19:33:17 2017</div><div class="line">;; MSG SIZE  rcvd: 62</div><div class="line"></div><div class="line">[root@dns-client1 ~]<span class="comment"># nslookup dns.test.com</span></div><div class="line">Server:         172.168.1.125</div><div class="line">Address:        172.168.1.125<span class="comment">#53</span></div><div class="line"></div><div class="line">Name:   dns.test.com</div><div class="line">Address: 172.168.1.141</div><div class="line">Name:   dns.test.com</div><div class="line">Address: 172.168.1.140</div><div class="line"></div><div class="line">[root@dns-client1 ~]<span class="comment"># ping dns.test.com</span></div><div class="line">PING dns.test.com (172.168.1.141) 56(84) bytes of data.</div><div class="line">64 bytes from dns.test.com (172.168.1.141): icmp_seq=1 ttl=64 time=0.248 ms</div><div class="line">64 bytes from dns.test.com (172.168.1.141): icmp_seq=2 ttl=64 time=0.360 ms</div><div class="line">64 bytes from dns.test.com (172.168.1.141): icmp_seq=3 ttl=64 time=0.274 ms</div><div class="line">^C</div><div class="line">--- dns.test.com ping statistics ---</div><div class="line">3 packets transmitted, 3 received, 0% packet loss, time 2312ms</div><div class="line">rtt min/avg/max/mdev = 0.248/0.294/0.360/0.047 ms</div><div class="line"></div><div class="line">[root@dns-client1 ~]<span class="comment"># ping dns.test.com</span></div><div class="line">PING dns.test.com (172.168.1.140) 56(84) bytes of data.</div><div class="line">64 bytes from dns.test.com (172.168.1.140): icmp_seq=1 ttl=64 time=0.037 ms</div><div class="line">64 bytes from dns.test.com (172.168.1.140): icmp_seq=2 ttl=64 time=0.017 ms</div><div class="line">64 bytes from dns.test.com (172.168.1.140): icmp_seq=3 ttl=64 time=0.017 ms</div><div class="line">^C</div><div class="line">--- dns.test.com ping statistics ---</div><div class="line">3 packets transmitted, 3 received, 0% packet loss, time 2405ms</div><div class="line">rtt min/avg/max/mdev = 0.017/0.023/0.037/0.011 ms</div></pre></td></tr></table></figure>
+<hr>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+	<div class="copyright">
+	  <span>转载请务必注明来源: <a href="/" title="访问 WangXin 的个人博客">小鑫的博客</a></span>
+	  <span><a href="/p/43d3dbac/" title="查看文章: Dnsmasq-为小型网络环境提供DNS服务">https://iwangxin.net/p/43d3dbac/</a></span>
+	</div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Dnsmasq/" rel="tag"><i class="fa fa-tag"></i> Dnsmasq</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <span class="fa fa-share-alt"></span><span class="share-to"> 分享到: </span>
+	<a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+	<a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给QQ好友"></a>
+	<a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+	<a href="#" class="fa fa-renren bds_renren" data-cmd="renren" title="分享到人人网"></a>
+    <a href="#" class="fa fa-tencent-weibo bds_tencent-weibo" data-cmd="tqq" title="分享到腾讯微博"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="https://wxblog.b0.upaiyun.com/pic/png/avatar_120x120.png" alt="WangXin">
+          <p class="site-author-name" itemprop="name">WangXin</p>
+           
+              <p class="site-description motion-element" itemprop="description">Shandong,China</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/cquptwx/" target="_blank" title="GitHub" rel="external nofollow noopener noreferrer">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="mailto:cquptwx@gmail.com" target="_blank" title="Mail" rel="external nofollow noopener noreferrer">
+                  
+                    <i class="fa fa-fw fa-envelope"></i>
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="/atom.xml" target="_blank" title="rss">
+                  
+                    <i class="fa fa-fw fa-rss"></i>
+                  
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-address-book"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://www.coolguy.pw/" title="coolguy" target="_blank" rel="external nofollow noopener noreferrer">coolguy</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.cnblogs.com/occl/" title="L'E" target="_blank" rel="external nofollow noopener noreferrer">L'E</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+	<div class="sidebar_code motion-element">
+		<div class="sidebar_code_title">
+		  <i class="fa  fa-fw fa-qrcode"></i>
+		  手机扫码访问
+		</div>
+		<img class="sidebar_code_img" src="https://wxblog.b0.upaiyun.com/pic/png/sidebar_code.png" alt="手机扫描二维码登陆">
+	</div>	
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Dnsmasq-简介和适用平台"><span class="nav-number">1.</span> <span class="nav-text">Dnsmasq 简介和适用平台</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dnsmasq-部署"><span class="nav-number">2.</span> <span class="nav-text">Dnsmasq 部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dns-server-安装-Dnsmasq"><span class="nav-number">2.1.</span> <span class="nav-text">dns-server 安装 Dnsmasq</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#通过yum安装"><span class="nav-number">2.1.1.</span> <span class="nav-text">通过yum安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通过源码安装"><span class="nav-number">2.1.2.</span> <span class="nav-text">通过源码安装</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dns-server-启动-Dnsmasq-服务并设置开机启动"><span class="nav-number">2.2.</span> <span class="nav-text">dns-server 启动 Dnsmasq 服务并设置开机启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#所有节点关闭防火墙和SELINUX"><span class="nav-number">2.3.</span> <span class="nav-text">所有节点关闭防火墙和SELINUX</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dnsmasq-配置"><span class="nav-number">3.</span> <span class="nav-text">Dnsmasq 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dns-server-配置"><span class="nav-number">3.1.</span> <span class="nav-text">dns-server 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#dns-server-配置-etc-dnsmasq-conf"><span class="nav-number">3.1.1.</span> <span class="nav-text">dns-server 配置 /etc/dnsmasq.conf</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dns-server-配置-etc-resolv-conf"><span class="nav-number">3.1.2.</span> <span class="nav-text">dns-server 配置 /etc/resolv.conf</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dns-server-配置-etc-dnsmasq-hosts"><span class="nav-number">3.1.3.</span> <span class="nav-text">dns-server 配置 /etc/dnsmasq.hosts</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dns-server-配置-etc-resolv-dnsmasq-conf"><span class="nav-number">3.1.4.</span> <span class="nav-text">dns-server 配置 /etc/resolv.dnsmasq.conf</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dns-server-重启-dnsmasq服务"><span class="nav-number">3.1.5.</span> <span class="nav-text">dns-server 重启 dnsmasq服务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dns-client-配置"><span class="nav-number">3.2.</span> <span class="nav-text">dns-client 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#dns-client-配置-etc-resolv-conf"><span class="nav-number">3.2.1.</span> <span class="nav-text">dns-client 配置 /etc/resolv.conf</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dnsmasq-验证"><span class="nav-number">4.</span> <span class="nav-text">Dnsmasq 验证</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dns-server-端验证"><span class="nav-number">4.1.</span> <span class="nav-text">dns-server 端验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dns-client-端验证"><span class="nav-number">4.2.</span> <span class="nav-text">dns-client 端验证</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-superpowers fa-pulse"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WangXin</span>
+  <span class="author_icon">
+	<a href="https://www.upyun.com/" target="_blank" rel="external nofollow noopener noreferrer">
+		<img src="/images/upyun_logo5.png" alt="UPYUN" class="upyun_footer">
+	</a>
+  </span>
+</div>
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+	  	 
+           <span id="scrollpercent"><span>0</span>%</span>
+         
+       <div class="back-to-top-toggle">
+         <span class="back-toggle-line back-toggle-line-first"></span>
+         <span class="back-toggle-line back-toggle-line-last"></span>
+       </div>
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.3/jquery.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.bootcss.com/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.bootcss.com/velocity/1.2.3/velocity.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.bootcss.com/velocity/1.2.3/velocity.ui.min.js"></script>
+
+  
+  <script type="text/javascript" src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/schemes/mist.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "0fa1582c7f50487a8df1aa31cc521166",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("YTQQVN3pnOrbYTwDNUKXnNEW-gzGzoHsz", "mOqe1FG02VeCFCQkBF0raoEu");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
